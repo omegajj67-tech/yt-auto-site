@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>yt-auto spec 작성</title>
+  <style>
+    :root { --bg:#0b1220; --panel:#0f1b33; --text:#e8eefc; --muted:#a8b7dc; --line:rgba(255,255,255,.12); --accent:#7aa2ff; --ok:#30d158; --warn:#ffd60a; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:980px;margin:0 auto;padding:22px 20px 40px}
+    header{border-bottom:1px solid var(--line);background:rgba(15,27,51,.65)}
+    header .wrap{padding:18px 20px}
+    h1{margin:0;font-size:26px;letter-spacing:-.3px}
+    .sub{margin:8px 0 0;color:var(--muted);line-height:1.6}
+    .nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+    .pill{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:700;font-size:13px}
+    .card{margin-top:14px;padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
+    h2{margin:0 0 10px;font-size:18px}
+    p{margin:8px 0;color:var(--muted);line-height:1.65}
+    ul{margin:8px 0 0 18px;color:var(--muted);line-height:1.7}
+    pre{margin:10px 0 0;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;color:#eaf0ff;line-height:1.55}
+    .ok{border-left:4px solid var(--ok);padding-left:10px}
+    .warn{border-left:4px solid var(--warn);padding-left:10px}
+    code{color:#eaf0ff}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>spec 작성</h1>
+      <p class="sub">목표: 최소 spec.json을 만들고 validate를 통과한 뒤 render로 확장.</p>
+      <div class="nav">
+        <a class="pill" href="../index.html">← 홈</a>
+        <a class="pill" href="./install.html">설치</a>
+        <a class="pill" href="./usage.html">사용법</a>
+        <a class="pill" href="https://github.com/omegajj67-tech/legendary-spoon/tree/main/yt-auto" target="_blank" rel="noreferrer">코드</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <h2>0) 원칙</h2>
+      <ul>
+        <li><b>최소 구성</b>으로 먼저 성공: 장면 1개 → 레이어 1개 → 짧은 길이</li>
+        <li>경로는 단순하게: 프로젝트 폴더 기준 상대경로 추천</li>
+        <li>validate 통과 후에만 확장(트랜지션/오디오/자막 등)</li>
+      </ul>
+      <p class="warn">실제 스키마 필드명은 레포의 schema 코드/README를 기준으로 맞추세요. 여기 예제는 “개념 템플릿”입니다.</p>
+    </div>
+
+    <div class="card">
+      <h2>1) 예제 폴더 구조(권장)</h2>
+      <pre>my-project/
+  assets/
+    bg.jpg
+    music.mp3
+  spec.json
+  meta.json
+  out/</pre>
+      <p class="ok">이 구조로 잡으면 “assets 경로/출력 경로”가 단순해집니다.</p>
+    </div>
+
+    <div class="card">
+      <h2>2) 최소 spec.json (개념 템플릿)</h2>
+      <p>아래는 “필드가 이런 레벨로 존재한다”는 최소 템플릿입니다. 실제 필드는 레포 스키마에 맞춰 조정하세요.</p>
+      <pre>{
+  "version": 1,
+  "output": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationSec": 5
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "durationSec": 5,
+      "layers": [
+        {
+          "type": "image",
+          "src": "assets/bg.jpg",
+          "fit": "cover"
+        }
+      ]
+    }
+  ]
+}</pre>
+    </div>
+
+    <div class="card">
+      <h2>3) meta.json (선택)</h2>
+      <p>썸네일/메타데이터 생성이 파이프라인에 있다면, 아래 형태로 분리해 관리할 수 있습니다.</p>
+      <pre>{
+  "title": "yt-auto 테스트 영상",
+  "description": "spec.json 기반 렌더 테스트",
+  "tags": ["yt-auto", "ffmpeg", "automation"]
+}</pre>
+    </div>
+
+    <div class="card">
+      <h2>4) validate → render 흐름</h2>
+      <pre># spec 검증
+node yt-auto/packages/core/dist/cli.js validate ./my-project/spec.json
+
+# 렌더(출력 옵션은 render --help로 확인)
+node yt-auto/packages/core/dist/cli.js render ./my-project/spec.json --out ./my-project/out/video.mp4</pre>
+    </div>
+
+    <div class="card">
+      <h2>5) 확장 체크리스트</h2>
+      <ul>
+        <li>자막/텍스트 레이어 추가</li>
+        <li>음악/나레이션 오디오 트랙 추가</li>
+        <li>장면 2개 이상 + 트랜지션</li>
+        <li>각 장면별 타임라인/레이어 순서 고정</li>
+      </ul>
+      <p class="warn">확장할 때는 “한 번에 1개 기능만” 추가하고 매번 validate/render로 확인하세요.</p>
+    </div>
+
+    <div class="card">
+      <h2>6) 다음 작업(추천)</h2>
+      <p class="ok">주인님이 원하시면, 레인이 <b>현재 레포의 실제 스키마(필드명)</b>에 맞춰 spec 예제를 “실제 동작하는 JSON”으로 재작성해드릴 수 있습니다.</p>
+      <p>그때는 <code>yt-auto/packages/core/src/schema/</code> 또는 schema 관련 파일 경로 캡처/링크만 주시면 됩니다.</p>
+    </div>
+  </main>
+</body>
+</html>
