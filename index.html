@@ -18,3 +18,558 @@
   </ul>
 </body>
 </html>
+
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>yt-auto-site | yt-auto 문서</title>
+  <meta name="description" content="yt-auto(JSON spec → FFmpeg) 설치/사용법/spec 문서 포털" />
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #0f1b33;
+      --text: #e8eefc;
+      --muted: #a8b7dc;
+      --line: rgba(255,255,255,0.12);
+      --accent: #7aa2ff;
+      --ok: #30d158;
+      --warn: #ffd60a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(122,162,255,0.22), transparent 60%),
+                  radial-gradient(900px 500px at 85% 20%, rgba(48,209,88,0.16), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      padding: 28px 20px 10px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(to bottom, rgba(15,27,51,0.7), rgba(15,27,51,0.0));
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+    .title {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      margin: 0 0 10px;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 10px; border-radius: 999px;
+      background: rgba(48,209,88,0.12);
+      border: 1px solid rgba(48,209,88,0.35);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .h1 { font-size: 34px; font-weight: 900; margin: 0; letter-spacing: -0.4px; }
+    .sub { margin: 6px 0 0; color: var(--muted); line-height: 1.6; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+      margin: 18px 0 30px;
+    }
+    .card {
+      grid-column: span 6;
+      padding: 16px 16px 14px;
+      border-radius: 16px;
+      background: rgba(15,27,51,0.8);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 45px rgba(0,0,0,0.35);
+      min-height: 120px;
+    }
+    .card h2 { margin: 0 0 8px; font-size: 18px; letter-spacing: -0.2px; }
+    .card p { margin: 0 0 10px; color: var(--muted); line-height: 1.55; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .btn.primary {
+      border-color: rgba(122,162,255,0.55);
+      background: rgba(122,162,255,0.16);
+    }
+    .btn:hover { background: rgba(255,255,255,0.07); text-decoration: none; }
+    .full { grid-column: span 12; }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12.5px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      overflow-x: auto;
+      color: #eaf0ff;
+      line-height: 1.55;
+    }
+    .kpi { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .pill {
+      padding: 6px 10px; border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 18px 0 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 820px) {
+      .card { grid-column: span 12; }
+      .h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="title">
+        <span class="badge">✅ yt-auto-site 정상 배포</span>
+        <h1 class="h1">yt-auto 문서 포털</h1>
+      </div>
+      <p class="sub">
+        JSON spec 기반으로 영상(장면/레이어/트랜지션/오디오)을 정의하고, <b>FFmpeg</b>로 MP4를 렌더링하는 <b>yt-auto</b> 실행 가이드입니다.
+        <br/>이 사이트는 GitHub Pages로 배포됩니다.
+      </p>
+      <div class="kpi">
+        <span class="pill">배포 테스트: 2026-02-12</span>
+        <span class="pill">대상: omegajj67-tech</span>
+        <span class="pill">용도: 설치/사용법/spec 문서</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="grid">
+      <div class="card">
+        <h2>1) 설치</h2>
+        <p>Node / 패키지 설치, FFmpeg 준비, 빌드/실행까지 한 번에 정리했습니다.</p>
+        <div class="actions">
+          <a class="btn primary" href="./docs/install.html">설치 가이드 열기</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2) 사용법</h2>
+        <p>CLI 명령(예: validate / render / init / info) 흐름을 실행 단계로 안내합니다.</p>
+        <div class="actions">
+          <a class="btn primary" href="./docs/usage.html">사용법 보기</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>3) spec 작성</h2>
+        <p>spec.json / meta.json 구조를 “최소 예제 → 확장” 순서로 제공합니다.</p>
+        <div class="actions">
+          <a class="btn primary" href="./docs/spec.html">spec 문서 보기</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>4) 코드 바로가기</h2>
+        <p>코드는 별도 저장소(또는 monorepo 하위 폴더)에 있으며, 여기서 빠르게 이동합니다.</p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/omegajj67-tech/legendary-spoon/tree/main/yt-auto" target="_blank" rel="noreferrer">yt-auto 코드 보기</a>
+          <a class="btn" href="https://github.com/omegajj67-tech/legendary-spoon" target="_blank" rel="noreferrer">legendary-spoon 저장소</a>
+        </div>
+      </div>
+
+      <div class="card full">
+        <h2>빠른 시작(로컬 실행)</h2>
+        <p>아래는 “개념 흐름”입니다. 실제 커맨드는 사용법 페이지에서 레포 구조에 맞게 확인하세요.</p>
+        <pre class="mono"># 1) 코드 받기
+git clone https://github.com/omegajj67-tech/legendary-spoon.git
+cd legendary-spoon
+
+# 2) 설치/빌드 (pnpm/yarn/npm 중 레포에 맞는 것으로)
+pnpm install
+pnpm -r build
+
+# 3) 실행(예시)
+node yt-auto/packages/core/dist/cli.js --help
+node yt-auto/packages/core/dist/cli.js validate ./example/spec.json
+node yt-auto/packages/core/dist/cli.js render ./example/spec.json --out ./out/video.mp4</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div>© yt-auto-site · GitHub Pages 배포 · 문서/링크 포털</div>
+    </div>
+  </footer>
+</body>
+</html>
+
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>yt-auto 설치 가이드</title>
+  <style>
+    :root { --bg:#0b1220; --panel:#0f1b33; --text:#e8eefc; --muted:#a8b7dc; --line:rgba(255,255,255,.12); --accent:#7aa2ff; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:980px;margin:0 auto;padding:22px 20px 40px}
+    header{border-bottom:1px solid var(--line);background:rgba(15,27,51,.65)}
+    header .wrap{padding:18px 20px}
+    h1{margin:0;font-size:26px;letter-spacing:-.3px}
+    .sub{margin:8px 0 0;color:var(--muted);line-height:1.6}
+    .nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+    .pill{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:700;font-size:13px}
+    .card{margin-top:14px;padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
+    h2{margin:0 0 10px;font-size:18px}
+    p{margin:8px 0;color:var(--muted);line-height:1.65}
+    ul{margin:8px 0 0 18px;color:var(--muted);line-height:1.7}
+    pre{margin:10px 0 0;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;color:#eaf0ff;line-height:1.55}
+    .warn{border-left:4px solid #ffd60a;padding-left:10px}
+    .ok{border-left:4px solid #30d158;padding-left:10px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>설치 가이드</h1>
+      <p class="sub">목표: 로컬 환경에서 yt-auto 실행(검증/렌더)까지 완료.</p>
+      <div class="nav">
+        <a class="pill" href="../index.html">← 홈</a>
+        <a class="pill" href="./usage.html">사용법</a>
+        <a class="pill" href="./spec.html">spec 작성</a>
+        <a class="pill" href="https://github.com/omegajj67-tech/legendary-spoon/tree/main/yt-auto" target="_blank" rel="noreferrer">코드</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <h2>0) 준비물</h2>
+      <p class="ok"><b>필수:</b> Node.js(권장 18+), FFmpeg, Git</p>
+      <ul>
+        <li>Node 확인: <code>node -v</code>, <code>npm -v</code></li>
+        <li>FFmpeg 확인: <code>ffmpeg -version</code></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>1) FFmpeg 설치</h2>
+      <p class="warn">yt-auto는 렌더 단계에서 FFmpeg를 호출합니다. 없으면 render가 실패합니다.</p>
+
+      <p><b>macOS(Homebrew)</b></p>
+      <pre>brew update
+brew install ffmpeg
+ffmpeg -version</pre>
+
+      <p><b>Ubuntu/Debian</b></p>
+      <pre>sudo apt update
+sudo apt install -y ffmpeg
+ffmpeg -version</pre>
+
+      <p><b>Windows(winget)</b></p>
+      <pre>winget install Gyan.FFmpeg
+ffmpeg -version</pre>
+    </div>
+
+    <div class="card">
+      <h2>2) 코드 받기</h2>
+      <pre>git clone https://github.com/omegajj67-tech/legendary-spoon.git
+cd legendary-spoon</pre>
+      <p>yt-auto가 monorepo 하위 폴더로 들어있다면, 경로는 보통 <code>yt-auto/</code> 입니다.</p>
+    </div>
+
+    <div class="card">
+      <h2>3) 의존성 설치 & 빌드</h2>
+      <p class="warn">레포가 pnpm/yarn/npm 중 무엇을 쓰는지에 따라 명령이 달라집니다. 루트에 락파일을 보고 선택하세요.</p>
+      <ul>
+        <li><code>pnpm-lock.yaml</code> → pnpm</li>
+        <li><code>yarn.lock</code> → yarn</li>
+        <li><code>package-lock.json</code> → npm</li>
+      </ul>
+
+      <p><b>pnpm</b></p>
+      <pre>corepack enable
+pnpm -v
+pnpm install
+pnpm -r build</pre>
+
+      <p><b>npm</b></p>
+      <pre>npm install
+npm run build</pre>
+
+      <p><b>yarn</b></p>
+      <pre>yarn install
+yarn build</pre>
+    </div>
+
+    <div class="card">
+      <h2>4) 설치 확인(가장 먼저 할 것)</h2>
+      <p>CLI 도움말이 떠야 정상입니다. (dist 경로는 빌드 결과에 따라 다를 수 있습니다.)</p>
+      <pre># 예시: cli.js 위치가 아래라고 가정
+node yt-auto/packages/core/dist/cli.js --help</pre>
+
+      <p class="warn">만약 <code>dist/cli.js</code>를 못 찾으면, 아래로 실제 파일 위치를 확인하세요.</p>
+      <pre>find yt-auto -maxdepth 6 -type f -name "cli.js" -o -name "cli.mjs" -o -name "index.js" | head</pre>
+    </div>
+
+    <div class="card">
+      <h2>5) 흔한 오류</h2>
+      <ul>
+        <li><b>ffmpeg not found</b> → FFmpeg 설치/경로 문제</li>
+        <li><b>Cannot find module dist/cli.js</b> → 빌드 안 됨 또는 출력 경로 다름</li>
+        <li><b>pnpm not found</b> → <code>corepack enable</code> 실행 후 재시도</li>
+      </ul>
+    </div>
+  </main>
+</body>
+</html>
+
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>yt-auto 사용법</title>
+  <style>
+    :root { --bg:#0b1220; --panel:#0f1b33; --text:#e8eefc; --muted:#a8b7dc; --line:rgba(255,255,255,.12); --accent:#7aa2ff; --ok:#30d158; --warn:#ffd60a; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:980px;margin:0 auto;padding:22px 20px 40px}
+    header{border-bottom:1px solid var(--line);background:rgba(15,27,51,.65)}
+    header .wrap{padding:18px 20px}
+    h1{margin:0;font-size:26px;letter-spacing:-.3px}
+    .sub{margin:8px 0 0;color:var(--muted);line-height:1.6}
+    .nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+    .pill{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:700;font-size:13px}
+    .card{margin-top:14px;padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
+    h2{margin:0 0 10px;font-size:18px}
+    p{margin:8px 0;color:var(--muted);line-height:1.65}
+    ul{margin:8px 0 0 18px;color:var(--muted);line-height:1.7}
+    pre{margin:10px 0 0;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;color:#eaf0ff;line-height:1.55}
+    .ok{border-left:4px solid var(--ok);padding-left:10px}
+    .warn{border-left:4px solid var(--warn);padding-left:10px}
+    code{color:#eaf0ff}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>사용법</h1>
+      <p class="sub">목표: spec.json을 검증(validate)하고, 영상으로 렌더(render)하고, 산출물을 확인하는 흐름.</p>
+      <div class="nav">
+        <a class="pill" href="../index.html">← 홈</a>
+        <a class="pill" href="./install.html">설치</a>
+        <a class="pill" href="./spec.html">spec 작성</a>
+        <a class="pill" href="https://github.com/omegajj67-tech/legendary-spoon/tree/main/yt-auto" target="_blank" rel="noreferrer">코드</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <h2>0) CLI 위치 확인</h2>
+      <p class="warn">아래 경로는 예시입니다. 먼저 <code>--help</code>로 실제 커맨드/옵션을 확인하세요.</p>
+      <pre>node yt-auto/packages/core/dist/cli.js --help</pre>
+      <p class="ok">도움말에 <b>render / validate / init / info</b> 같은 명령이 보이면 정상입니다.</p>
+    </div>
+
+    <div class="card">
+      <h2>1) init (프로젝트 틀 생성)</h2>
+      <p>샘플 spec/meta 디렉터리 구조를 생성하는 명령이 있다면, 가장 먼저 실행합니다.</p>
+      <pre># 예시
+node yt-auto/packages/core/dist/cli.js init ./my-project</pre>
+      <p class="warn">init이 없다면, 레포 안의 <code>examples/</code> 또는 샘플 json을 찾아 사용하세요.</p>
+      <pre>find yt-auto -maxdepth 6 -type d -name "examples" -o -name "example" -o -name "samples"
+find yt-auto -maxdepth 8 -type f -name "*.json" | head -n 50</pre>
+    </div>
+
+    <div class="card">
+      <h2>2) validate (spec 검증)</h2>
+      <p>렌더 전에 spec.json이 스키마를 통과하는지 확인합니다.</p>
+      <pre>node yt-auto/packages/core/dist/cli.js validate ./my-project/spec.json</pre>
+      <ul>
+        <li>실패하면 에러 메시지에 “어느 필드가 빠졌는지/형식이 틀렸는지”가 나옵니다.</li>
+        <li>검증 통과 후에 render로 넘어가세요.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>3) render (영상 생성)</h2>
+      <p>FFmpeg를 통해 최종 MP4를 생성합니다. 출력 경로 옵션은 <code>render --help</code>로 확인하세요.</p>
+      <pre># 예시
+node yt-auto/packages/core/dist/cli.js render ./my-project/spec.json --out ./out/video.mp4</pre>
+
+      <p class="warn">렌더 중 멈추거나 실패하면 아래를 먼저 확인하세요.</p>
+      <ul>
+        <li><code>ffmpeg -version</code> 이 정상인지</li>
+        <li>입력 assets(이미지/영상/오디오) 경로가 존재하는지</li>
+        <li>권한: 출력 폴더(<code>./out</code>) 생성/쓰기 권한</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>4) info (파이프라인 정보/진단)</h2>
+      <p>파이프라인 단계/환경 정보를 보여주는 명령이 있다면, 이걸로 문제를 좁힙니다.</p>
+      <pre># 예시
+node yt-auto/packages/core/dist/cli.js info</pre>
+    </div>
+
+    <div class="card">
+      <h2>5) 문제 발생 시 “최소 재현” 체크리스트</h2>
+      <ul>
+        <li>샘플 spec으로 먼저 render 성공시키기</li>
+        <li>내 spec은 장면(scene) 1개 + 이미지 1개 + 오디오 없음으로 축소</li>
+        <li>경로는 절대경로 또는 프로젝트 상대경로로 단순화</li>
+        <li>출력은 짧은 3~5초로 제한</li>
+      </ul>
+    </div>
+  </main>
+</body>
+</html>
+
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>yt-auto spec 작성</title>
+  <style>
+    :root { --bg:#0b1220; --panel:#0f1b33; --text:#e8eefc; --muted:#a8b7dc; --line:rgba(255,255,255,.12); --accent:#7aa2ff; --ok:#30d158; --warn:#ffd60a; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:980px;margin:0 auto;padding:22px 20px 40px}
+    header{border-bottom:1px solid var(--line);background:rgba(15,27,51,.65)}
+    header .wrap{padding:18px 20px}
+    h1{margin:0;font-size:26px;letter-spacing:-.3px}
+    .sub{margin:8px 0 0;color:var(--muted);line-height:1.6}
+    .nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+    .pill{padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:700;font-size:13px}
+    .card{margin-top:14px;padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
+    h2{margin:0 0 10px;font-size:18px}
+    p{margin:8px 0;color:var(--muted);line-height:1.65}
+    ul{margin:8px 0 0 18px;color:var(--muted);line-height:1.7}
+    pre{margin:10px 0 0;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;color:#eaf0ff;line-height:1.55}
+    .ok{border-left:4px solid var(--ok);padding-left:10px}
+    .warn{border-left:4px solid var(--warn);padding-left:10px}
+    code{color:#eaf0ff}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>spec 작성</h1>
+      <p class="sub">목표: 최소 spec.json을 만들고 validate를 통과한 뒤 render로 확장.</p>
+      <div class="nav">
+        <a class="pill" href="../index.html">← 홈</a>
+        <a class="pill" href="./install.html">설치</a>
+        <a class="pill" href="./usage.html">사용법</a>
+        <a class="pill" href="https://github.com/omegajj67-tech/legendary-spoon/tree/main/yt-auto" target="_blank" rel="noreferrer">코드</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <h2>0) 원칙</h2>
+      <ul>
+        <li><b>최소 구성</b>으로 먼저 성공: 장면 1개 → 레이어 1개 → 짧은 길이</li>
+        <li>경로는 단순하게: 프로젝트 폴더 기준 상대경로 추천</li>
+        <li>validate 통과 후에만 확장(트랜지션/오디오/자막 등)</li>
+      </ul>
+      <p class="warn">실제 스키마 필드명은 레포의 schema 코드/README를 기준으로 맞추세요. 여기 예제는 “개념 템플릿”입니다.</p>
+    </div>
+
+    <div class="card">
+      <h2>1) 예제 폴더 구조(권장)</h2>
+      <pre>my-project/
+  assets/
+    bg.jpg
+    music.mp3
+  spec.json
+  meta.json
+  out/</pre>
+      <p class="ok">이 구조로 잡으면 “assets 경로/출력 경로”가 단순해집니다.</p>
+    </div>
+
+    <div class="card">
+      <h2>2) 최소 spec.json (개념 템플릿)</h2>
+      <p>아래는 “필드가 이런 레벨로 존재한다”는 최소 템플릿입니다. 실제 필드는 레포 스키마에 맞춰 조정하세요.</p>
+      <pre>{
+  "version": 1,
+  "output": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationSec": 5
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "durationSec": 5,
+      "layers": [
+        {
+          "type": "image",
+          "src": "assets/bg.jpg",
+          "fit": "cover"
+        }
+      ]
+    }
+  ]
+}</pre>
+    </div>
+
+    <div class="card">
+      <h2>3) meta.json (선택)</h2>
+      <p>썸네일/메타데이터 생성이 파이프라인에 있다면, 아래 형태로 분리해 관리할 수 있습니다.</p>
+      <pre>{
+  "title": "yt-auto 테스트 영상",
+  "description": "spec.json 기반 렌더 테스트",
+  "tags": ["yt-auto", "ffmpeg", "automation"]
+}</pre>
+    </div>
+
+    <div class="card">
+      <h2>4) validate → render 흐름</h2>
+      <pre># spec 검증
+node yt-auto/packages/core/dist/cli.js validate ./my-project/spec.json
+
+# 렌더(출력 옵션은 render --help로 확인)
+node yt-auto/packages/core/dist/cli.js render ./my-project/spec.json --out ./my-project/out/video.mp4</pre>
+    </div>
+
+    <div class="card">
+      <h2>5) 확장 체크리스트</h2>
+      <ul>
+        <li>자막/텍스트 레이어 추가</li>
+        <li>음악/나레이션 오디오 트랙 추가</li>
+        <li>장면 2개 이상 + 트랜지션</li>
+        <li>각 장면별 타임라인/레이어 순서 고정</li>
+      </ul>
+      <p class="warn">확장할 때는 “한 번에 1개 기능만” 추가하고 매번 validate/render로 확인하세요.</p>
+    </div>
+
+    <div class="card">
+      <h2>6) 다음 작업(추천)</h2>
+      <p class="ok">주인님이 원하시면, 레인이 <b>현재 레포의 실제 스키마(필드명)</b>에 맞춰 spec 예제를 “실제 동작하는 JSON”으로 재작성해드릴 수 있습니다.</p>
+      <p>그때는 <code>yt-auto/packages/core/src/schema/</code> 또는 schema 관련 파일 경로 캡처/링크만 주시면 됩니다.</p>
+    </div>
+  </main>
+</body>
+</html>
